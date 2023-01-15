@@ -22,6 +22,7 @@ const markerEls = [...document.querySelectorAll("#markers > div")];
 /*----- event listeners -----*/
 // name of event is always string, then callback function
 document.getElementById("markers").addEventListener("click", handleDrop);
+playAgainButton.addEventListener("click", init);
 
 /*----- functions -----*/
 init();
@@ -106,11 +107,61 @@ function handleDrop(event) {
 	// Switch player turn
 	turn *= -1;
 	// Check for winner
-	winner = getWinner();	
+	winner = getWinner(colIdx, rowIdx);	
 
 	render();
 }
 
-function getWinner() {
+// Check for winner in board state and
+// return null if no winner, 1/-1 if a player has won, "T" if tied
+function getWinner(colIdx, rowIdx) {
+	return checkVerticalWin(colIdx, rowIdx) || 	checkHorizontalWin(colIdx, rowIdx) || 
+	checkDiagonalWinNESW(colIdx, rowIdx) || checkDiagonalWinNWSE(colIdx, rowIdx);
+
+}
+
+// functions used to check for a winner
+function checkVerticalWin (colIdx, rowIdx) {
+	return countAdjacent(colIdx, rowIdx, 0, -1) === 3 ? board[colIdx][rowIdx] : null;
+
+}
+
+function checkHorizontalWin (colIdx, rowIdx) {
+	const adjacentCountLeft = countAdjacent(colIdx, rowIdx, -1, 0);
+	const adjacentCountRight = countAdjacent(colIdx, rowIdx, 1, 0);
+	return (adjacentCountLeft + adjacentCountRight) >= 3 ? board[colIdx][rowIdx] : null;
+}
+
+function checkDiagonalWinNESW (colIdx, rowIdx) {
+	const adjacentCountNE = countAdjacent(colIdx, rowIdx, 1, 1);
+	const adjacentCountSW = countAdjacent(colIdx, rowIdx, -1, -1);
+	return (adjacentCountNE + adjacentCountSW) >= 3 ? board[colIdx][rowIdx] : null;
+}
+
+function checkDiagonalWinNWSE (colIdx, rowIdx) {
+	const adjacentCountNW = countAdjacent(colIdx, rowIdx, -1, 1);
+	const adjacentCountSE = countAdjacent(colIdx, rowIdx, 1, -1);
+	return (adjacentCountNW + adjacentCountSE) >= 3 ? board[colIdx][rowIdx] : null;
+}
+
+function countAdjacent (colIdx, rowIdx, colOffset, rowOffset) {
+	// Shortcut variable to the player value
+	const player = board[colIdx][rowIdx];
+	// Track count of adjacent cells with the same player value
+	let count = 0;
+	// Initialize the new cordinates
+	colIdx += colOffset;
+	rowIdx += rowOffset;
 	
+	while (
+		// Ensure colIdx is within bounds of the board array
+		board[colIdx] !== undefined && 
+		board[colIdx][rowIdx] !== undefined &&
+		board[colIdx][rowIdx] === player
+	) {
+		count++;
+		colIdx += colOffset;
+		rowIdx += rowOffset;		
+	}
+	return count;
 }

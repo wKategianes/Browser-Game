@@ -17,10 +17,11 @@ let winner;
 const messageEl = document.querySelector("h1");
 const playAgainButton = document.querySelector("button");
 // selecting all the children divs of the markers
-const markerEls = document.querySelectorAll("#markers > div");
+const markerEls = [...document.querySelectorAll("#markers > div")];
 
 /*----- event listeners -----*/
-
+// name of event is always string, then callback function
+document.getElementById("markers").addEventListener("click", handleDrop);
 
 /*----- functions -----*/
 init();
@@ -88,4 +89,28 @@ function renderControls() {
 		const hideMarker = !board[colIdx].includes(0) || winner;
 		markerEl.style.visibility = hideMarker ? "hidden" : "visible";
 	});
+}
+
+// In response to user interaction, update all impacted 
+// state, then call render();
+function handleDrop(event) {
+	const colIdx = markerEls.indexOf(event.target);
+	// Guards...
+	if (colIdx === -1) return;
+	// Shortcut to the column array
+	const colArr = board[colIdx];
+	// Find the index of the first 0 in colArr
+	const rowIdx = colArr.indexOf(0);
+	// Update the board state with the current player value (turn)
+	colArr[rowIdx] = turn;
+	// Switch player turn
+	turn *= -1;
+	// Check for winner
+	winner = getWinner();	
+
+	render();
+}
+
+function getWinner() {
+	
 }
